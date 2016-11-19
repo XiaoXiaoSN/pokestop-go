@@ -8,6 +8,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.gson.Gson;
@@ -24,7 +25,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
-
+    Marker[] m = new Marker[65060];
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -56,7 +57,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
         // 替換上輔大的座標25.035494, 121.431618
         LatLng fju = new LatLng(25.035494,  121.431618);
-        mMap.addMarker(new MarkerOptions().position(fju).title("輔仁大學"));
+        //mMap.addMarker(new MarkerOptions().position(fju).title("輔仁大學"));
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
@@ -81,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string","SELECT * FROM `TABLE 1` LIMIT 20")
+                .add("query_string","SELECT * FROM `TABLE 1` ")
                 .build();
         String run(String url) throws IOException {
             Request request = new Request.Builder()
@@ -104,7 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 StringBuilder sb = new StringBuilder();
                 for(PokeStop pokestop :pokestops){
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
-                    mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()));
+                    m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(false));
                 }
 
             }
