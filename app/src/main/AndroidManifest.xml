@@ -34,15 +34,19 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAGcaiKYhc3nezx0F40Y26SJRRIBNo55FY" />
-
         <activity
-            android:name=".MapsActivity"
+            android:name=".SplashScreen"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
             android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".MapsActivity"
+            android:screenOrientation="portrait" >
         </activity>
     </application>
 
