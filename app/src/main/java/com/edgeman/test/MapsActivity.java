@@ -82,7 +82,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string","SELECT * FROM `TABLE 1` ")
+                .add("query_string","SELECT * FROM `TABLE 1`  LIMIT 20")
                 .build();
         String run(String url) throws IOException {
             Request request = new Request.Builder()
@@ -105,7 +105,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 StringBuilder sb = new StringBuilder();
                 for(PokeStop pokestop :pokestops){
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
-                    m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(false));
+                    m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
                 }
 
             }
