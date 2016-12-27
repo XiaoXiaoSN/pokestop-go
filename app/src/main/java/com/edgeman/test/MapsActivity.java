@@ -11,6 +11,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -20,6 +21,10 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static android.R.id.input;
+import static android.graphics.Color.GRAY;
+import static android.graphics.Color.LTGRAY;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -49,22 +54,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+    void mapping(PokeStop[] input,GoogleMap mMap){
+        int i;
+        for(i=0;i<10;i++)
+        {
+
+        }
+    };
+
+
     @Override
     public void onMapReady(GoogleMap googleMap)
     {
         mMap = googleMap;
-
         // Add a marker in Sydney and move the camera
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
         // 替換上輔大的座標25.035494, 121.431618
-        LatLng fju = new LatLng(25.035494,  121.431618);
-        //mMap.addMarker(new MarkerOptions().position(fju).title("輔仁大學"));
+
+        LatLng fju= new LatLng(25.035494,  121.431000);
+        LatLng fju1 = new LatLng(25.035494,  121.431618);
+        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
+        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
+        mMap.addPolyline(new PolylineOptions().
+                add(fju).
+                add(fju1).
+                width(5).
+                color(GRAY).
+                geodesic(true)
+        );
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
         mMap.getUiSettings().setZoomControlsEnabled(true);  // 右下角的放大縮小功能
         mMap.getUiSettings().setCompassEnabled(true);       // 左上角的指南針，要兩指旋轉才會出現
         mMap.getUiSettings().setMapToolbarEnabled(true);    // 右下角的導覽及開啟 Google Map功能
+
+
 
         /*mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
@@ -125,4 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+
+
 }
