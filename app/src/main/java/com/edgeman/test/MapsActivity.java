@@ -2,6 +2,8 @@ package com.edgeman.test;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,12 +33,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        final Button restart ;
+        restart= (Button)findViewById(R.id.button_restart);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         new RunWork().start();
-        ///I hate you
+        restart.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+
+                mMap.clear();
+            }
+        });
     }
 
 
