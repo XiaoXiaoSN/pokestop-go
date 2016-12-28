@@ -1,5 +1,12 @@
 package com.edgeman.test;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,6 +25,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -37,6 +45,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LatLng mylatlng ;
     PokeStop[] pokestops;
     Marker[] m = new Marker[65060];
+
+    LocationManager lm;
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            mylatlng = new LatLng( location.getLongitude(),  location.getLatitude());
+        }
+        public void onProviderDisabled(String provider) {}
+        public void onProviderEnabled(String provider) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -44,6 +63,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         final Button restart ;
         restart= (Button)findViewById(R.id.button_restart);
+
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        checkPermission();
+        lm.requestLocationUpdates(lm.GPS_PROVIDER, 200, 5, locationListener);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -53,7 +77,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //mylatlng = getmyloc();
-                mylatlng = new LatLng(25.035494,  121.431618);
+                //mylatlng = new LatLng(25.035494,  121.431618);
                 query = "SELECT * FROM `TABLE 1` WHERE lat >"+ mylatlng.latitude+"-0.0045 && lat <"+mylatlng.latitude+"+0.0045 && lng > "+mylatlng.longitude+"-0.0064&&lng<"+mylatlng.longitude+"+0.0064";
                 Log.i("debug",query);
 
@@ -92,7 +116,47 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     };
 
  */
+    public LatLng getLastKnownLocation() {
+        LocationManager mLocationManager;
+        mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        if( !checkPermission() ) return null;
+        for (String provider : providers) {
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = l;
+            }
+        }
+        return new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
+    }
 
+    private boolean checkPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.e("ERR", "No Permission");
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    10
+            );
+            return false;
+        }
+        else
+            return true;
+    }
 
     @Override
     public void onMapReady(GoogleMap googleMap)
@@ -102,6 +166,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
         // 替換上輔大的座標25.035494, 121.431618
 
+        /*
+        //畫線
         LatLng fju= new LatLng(25.035494,  121.431000);
         LatLng fju1 = new LatLng(25.035494,  121.431618);
         mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
@@ -112,7 +178,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 color(GRAY).
                 geodesic(true)
         );
+        */
 
+        mylatlng = getLastKnownLocation();
+        mMap.addMarker(new MarkerOptions().position(mylatlng).title("開起來的時候"));
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
         mMap.getUiSettings().setZoomControlsEnabled(true);  // 右下角的放大縮小功能
@@ -124,7 +193,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /*mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
                 */
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fju,16));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mylatlng,16));
     }
 
 
