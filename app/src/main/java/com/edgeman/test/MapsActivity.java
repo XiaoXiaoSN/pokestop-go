@@ -17,6 +17,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -44,7 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String query="SELECT * FROM `TABLE 1` LIMIT 20";
     LatLng mylatlng ;
     PokeStop[] pokestops;
-    Marker[] m = new Marker[65060];
+    Marker[] marker = new Marker[65060];
 
     LocationManager lm;
     LocationListener locationListener = new LocationListener() {
@@ -86,36 +88,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-    
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
-/* testing input
-
-    void mapping(PokeStop[] input,GoogleMap mMap){
-        int i;
-        LatLng fju[ ];
-        for(i=0;i<10;i++)
-        {
-                fju[i]=new LatLng(Pokestop[i].getLat,Pokestop[i].getLng);
-        }
-        mMap.addPolyline(new PolylineOptions().
-                add(fju[0],fju[1],fju[2],fju[3],fju[4],fju[5],fju[6],fju[7],fju[8],fju[9]).
-                width(5).
-                color(GRAY).
-                geodesic(true)
+    public Marker addPokeMarker(LatLng latLng, String title, String stopid){
+        BitmapDescriptor descriptor = (
+                BitmapDescriptorFactory.fromResource(
+                        getResources().getIdentifier("pokestop", "drawable", getPackageName())
+                )
         );
+        return (
+                this.mMap.addMarker(
+                        new MarkerOptions()
+                                .position( latLng )
+                                .title( title )
+                                .icon( descriptor )
+                )
+        );
+    }
 
-    };
-
- */
     public LatLng getLastKnownLocation() {
         LocationManager mLocationManager;
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -181,7 +170,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         */
 
         mylatlng = getLastKnownLocation();
-        mMap.addMarker(new MarkerOptions().position(mylatlng).title("開起來的時候"));
+
+        Marker marker = addPokeMarker(mylatlng,"開起來的時候","100");
+
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
         mMap.getUiSettings().setZoomControlsEnabled(true);  // 右下角的放大縮小功能
@@ -232,7 +223,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
                     //25.031756, 121.426571             25.040756, 121.439397    && t1.longitude>121.426571 &&t1.longitude<121.439397
                     //if(t1.latitude > 25.035494 && t1.latitude <25.040756 && t1.longitude>121.426571 &&t1.longitude<121.439397) {
-                        m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
+                    marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
                     //}
                 }
 
