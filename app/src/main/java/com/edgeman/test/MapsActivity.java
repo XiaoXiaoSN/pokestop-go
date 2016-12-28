@@ -2,6 +2,9 @@ package com.edgeman.test;
 
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,18 +33,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
+    String query="SELECT * FROM `TABLE 1` LIMIT 20";
+    LatLng mylatlng ;
+    PokeStop[] pokestops;
     Marker[] m = new Marker[65060];
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        final Button restart ;
+        restart= (Button)findViewById(R.id.button_restart);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+        final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         new RunWork().start();
-        ///I hate you
+        restart.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //mylatlng = getmyloc();
+                mylatlng = new LatLng(25.035494,  121.431618);
+                query = "SELECT * FROM `TABLE 1` WHERE lat >"+ mylatlng.latitude+"-0.0045 && lat <"+mylatlng.latitude+"+0.0045 && lng > "+mylatlng.longitude+"-0.0064&&lng<"+mylatlng.longitude+"+0.0064";
+                Log.i("debug",query);
+
+                mMap.clear();
+                new RunWork().start();
+            }
+        });
     }
 
 
@@ -106,7 +125,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
                 */
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fju,16));
-
     }
 
 
@@ -119,7 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string","SELECT * FROM `TABLE 1`  LIMIT 20")
+                .add("query_string",query)
                 .build();
         String run(String url) throws IOException {
             Request request = new Request.Builder()
@@ -137,12 +155,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void run() {
                 //使用 gson 解析 json 資料
                 Gson gson = new Gson();
-                PokeStop[] pokestops = gson.fromJson(result_json,PokeStop[].class);
+                pokestops = gson.fromJson(result_json,PokeStop[].class);
 
                 StringBuilder sb = new StringBuilder();
                 for(PokeStop pokestop :pokestops){
+
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
-                    m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
+                    //25.031756, 121.426571             25.040756, 121.439397    && t1.longitude>121.426571 &&t1.longitude<121.439397
+                    //if(t1.latitude > 25.035494 && t1.latitude <25.040756 && t1.longitude>121.426571 &&t1.longitude<121.439397) {
+                        m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
+                    //}
                 }
 
             }
