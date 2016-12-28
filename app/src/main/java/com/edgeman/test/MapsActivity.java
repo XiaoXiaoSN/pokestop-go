@@ -1,5 +1,12 @@
 package com.edgeman.test;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,19 +17,27 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+
+import static android.R.id.input;
+import static android.graphics.Color.GRAY;
+import static android.graphics.Color.LTGRAY;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -31,7 +46,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String query="SELECT * FROM `TABLE 1` LIMIT 20";
     LatLng mylatlng ;
     PokeStop[] pokestops;
-    Marker[] m = new Marker[65060];
+    Marker[] marker = new Marker[65060];
+
+    LocationManager lm;
+    LocationListener locationListener = new LocationListener() {
+        public void onLocationChanged(Location location) {
+            mylatlng = new LatLng( location.getLongitude(),  location.getLatitude());
+        }
+        public void onProviderDisabled(String provider) {}
+        public void onProviderEnabled(String provider) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -39,6 +65,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         final Button restart ;
         restart= (Button)findViewById(R.id.button_restart);
+
+        lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        checkPermission();
+        lm.requestLocationUpdates(lm.GPS_PROVIDER, 200, 5, locationListener);
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -48,7 +79,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //mylatlng = getmyloc();
-                mylatlng = new LatLng(25.035494,  121.431618);
+                //mylatlng = new LatLng(25.035494,  121.431618);
                 query = "SELECT * FROM `TABLE 1` WHERE lat >"+ mylatlng.latitude+"-0.0045 && lat <"+mylatlng.latitude+"+0.0045 && lng > "+mylatlng.longitude+"-0.0064&&lng<"+mylatlng.longitude+"+0.0064";
                 Log.i("debug",query);
 
@@ -58,26 +89,89 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    public Marker addPokeMarker(LatLng latLng, String title, String stopid){
+        BitmapDescriptor descriptor = (
+                BitmapDescriptorFactory.fromResource(
+                        getResources().getIdentifier("pokestop", "drawable", getPackageName())
+                )
+        );
+        return (
+                this.mMap.addMarker(
+                        new MarkerOptions()
+                                .position( latLng )
+                                .title( title )
+                                .icon( descriptor )
+                )
+        );
+    }
 
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
+    public LatLng getLastKnownLocation() {
+        LocationManager mLocationManager;
+        mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+        List<String> providers = mLocationManager.getProviders(true);
+        Location bestLocation = null;
+        if( !checkPermission() ) return null;
+        for (String provider : providers) {
+            Location l = mLocationManager.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = l;
+            }
+        }
+        return new LatLng(bestLocation.getLatitude(), bestLocation.getLongitude());
+    }
+
+    private boolean checkPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            Log.e("ERR", "No Permission");
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[] {
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    },
+                    10
+            );
+            return false;
+        }
+        else
+            return true;
+    }
+
     @Override
     public void onMapReady(GoogleMap googleMap)
     {
         mMap = googleMap;
-
         // Add a marker in Sydney and move the camera
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
         // 替換上輔大的座標25.035494, 121.431618
-        LatLng fju = new LatLng(25.035494,  121.431618);
-        //mMap.addMarker(new MarkerOptions().position(fju).title("輔仁大學"));
+
+        /*
+        //畫線
+        LatLng fju= new LatLng(25.035494,  121.431000);
+        LatLng fju1 = new LatLng(25.035494,  121.431618);
+        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
+        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
+        mMap.addPolyline(new PolylineOptions().
+                add(fju,fju1).
+                width(5).
+                color(GRAY).
+                geodesic(true)
+        );
+        */
+
+        mylatlng = getLastKnownLocation();
+
+        Marker marker = addPokeMarker(mylatlng,"開起來的時候","100");
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
@@ -85,10 +179,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.getUiSettings().setCompassEnabled(true);       // 左上角的指南針，要兩指旋轉才會出現
         mMap.getUiSettings().setMapToolbarEnabled(true);    // 右下角的導覽及開啟 Google Map功能
 
+
+
         /*mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
                 */
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(fju,16));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mylatlng,16));
     }
 
 
@@ -127,7 +223,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
                     //25.031756, 121.426571             25.040756, 121.439397    && t1.longitude>121.426571 &&t1.longitude<121.439397
                     //if(t1.latitude > 25.035494 && t1.latitude <25.040756 && t1.longitude>121.426571 &&t1.longitude<121.439397) {
-                        m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
+                    marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
                     //}
                 }
 
@@ -147,4 +243,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+
+
 }
