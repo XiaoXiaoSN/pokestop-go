@@ -54,14 +54,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+/* testing input
 
     void mapping(PokeStop[] input,GoogleMap mMap){
         int i;
+        LatLng fju[ ];
         for(i=0;i<10;i++)
         {
-
+                fju[i]=new LatLng(Pokestop[i].getLat,Pokestop[i].getLng);
         }
+        mMap.addPolyline(new PolylineOptions().
+                add(fju[0],fju[1],fju[2],fju[3],fju[4],fju[5],fju[6],fju[7],fju[8],fju[9]).
+                width(5).
+                color(GRAY).
+                geodesic(true)
+        );
+
     };
+
+ */
 
 
     @Override
@@ -77,8 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
         mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
         mMap.addPolyline(new PolylineOptions().
-                add(fju).
-                add(fju1).
+                add(fju,fju1).
                 width(5).
                 color(GRAY).
                 geodesic(true)
