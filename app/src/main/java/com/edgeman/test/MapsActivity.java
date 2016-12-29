@@ -75,7 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        new RunWork().start();
+        //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //mylatlng = getmyloc();
@@ -214,19 +214,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void run() {
                 //使用 gson 解析 json 資料
-                Gson gson = new Gson();
-                pokestops = gson.fromJson(result_json,PokeStop[].class);
+                Log.d("result",result_json);
+                if (result_json != null) {
+                    Gson gson = new Gson();
+                    pokestops = gson.fromJson(result_json, PokeStop[].class);
+                    StringBuilder sb = new StringBuilder();
 
-                StringBuilder sb = new StringBuilder();
-                for(PokeStop pokestop :pokestops){
+                    for (PokeStop pokestop : pokestops) {
+                        LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
+                        marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
 
-                    LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
-                    //25.031756, 121.426571             25.040756, 121.439397    && t1.longitude>121.426571 &&t1.longitude<121.439397
-                    //if(t1.latitude > 25.035494 && t1.latitude <25.040756 && t1.longitude>121.426571 &&t1.longitude<121.439397) {
-                    marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
-                    //}
+                    }
                 }
-
             }
         };
 
