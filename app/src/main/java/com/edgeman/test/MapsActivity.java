@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -51,7 +52,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     LocationManager lm;
     LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-            mylatlng = new LatLng( location.getLongitude(),  location.getLatitude());
+            mylatlng = new LatLng( location.getLatitude(), location.getLongitude());
+            Toast.makeText(MapsActivity.this,
+                    Double.toString(mylatlng.latitude )+" , "+Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
         }
         public void onProviderDisabled(String provider) {}
         public void onProviderEnabled(String provider) {}
@@ -78,8 +81,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //mylatlng = getmyloc();
-                //mylatlng = new LatLng(25.035494,  121.431618);
                 query = "SELECT * FROM `TABLE 1` WHERE lat >"+ mylatlng.latitude+"-0.0045 && lat <"+mylatlng.latitude+"+0.0045 && lng > "+mylatlng.longitude+"-0.0064&&lng<"+mylatlng.longitude+"+0.0064";
                 Log.i("debug",query);
 
@@ -170,6 +171,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         */
 
         mylatlng = getLastKnownLocation();
+        Toast.makeText(MapsActivity.this,
+                Double.toString(mylatlng.latitude)+" , "+Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
 
         Marker marker = addPokeMarker(mylatlng,"開起來的時候","100");
 
