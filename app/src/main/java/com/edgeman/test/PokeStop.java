@@ -19,19 +19,19 @@ public class PokeStop {
     }
 
     public double getLat() {
-        return lat;
+        return lat+20.0;
     }
 
     public void setLat(double lat) {
-        this.lat = lat+20.0;
+        this.lat = lat;
     }
 
     public double getLng() {
-        return lng;
+        return lng+120.0;
     }
 
     public void setLng(double lng) {
-        this.lng = lng+120.0;
+        this.lng = lng;
     }
 
 
