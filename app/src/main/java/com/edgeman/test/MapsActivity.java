@@ -51,7 +51,7 @@ import static android.graphics.Color.LTGRAY;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
-    String query = "SELECT * FROM `stop` LIMIT 20";
+    String query = "";
     LatLng mylatlng;
     PokeStop[] pokestops;
     Marker[] marker = new Marker[65060];
@@ -61,7 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void onLocationChanged(Location location) {
             mylatlng = new LatLng(location.getLatitude(), location.getLongitude());
             Toast.makeText(MapsActivity.this,
-                    Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                    Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
         }
 
         public void onProviderDisabled(String provider) {
@@ -98,8 +98,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude-20.0) + "-0.0045 && lat <" + (mylatlng.latitude-20.0) + "+0.0045 && lng > " + (mylatlng.longitude-120.0) + "-0.0064&&lng<" + (mylatlng.longitude-120.0) + "+0.0064";
-                Log.i("debug", query);
+                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
+                //Log.i("debug", query);
 
                 mMap.clear();
                 new RunWork().start();
@@ -229,7 +229,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mylatlng = getLastKnownLocation();
         Toast.makeText(MapsActivity.this,
-                Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
 
         Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100");
 
@@ -295,7 +295,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public View getInfoContents(Marker marker) {
             View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
-            Log.i("test","testtttttttt");
+            Log.i("test","testtttttttttt");
             //TextView info1 = infoWindow.findViewById(R.id.);
             return infoWindow;
         }
@@ -303,13 +303,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
     class RunWork extends Thread {
-        String path_json = "http://nyapass.gear.host/";
+        String path_json = "http://nyapass.gear.host/getStop.php";
         String result_json = null;
 
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string", query)
+                .add("lat",Double.toString(mylatlng.latitude))
+                .add("lng",Double.toString(mylatlng.longitude))
                 .build();
 
         String run(String url) throws IOException {
@@ -333,7 +334,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     StringBuilder sb = new StringBuilder();
 
                     for (PokeStop pokestop : pokestops) {
-                        LatLng t1 = new LatLng(pokestop.getLat()+20.0 , pokestop.getLng() + 120.0);
+                        LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
                         marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
                     }
                 }
