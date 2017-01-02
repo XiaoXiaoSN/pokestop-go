@@ -51,7 +51,7 @@ import static android.graphics.Color.LTGRAY;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
-    String query = "SELECT * FROM `TABLE 1` LIMIT 20";
+    String query = "SELECT * FROM `stop` LIMIT 20";
     LatLng mylatlng;
     PokeStop[] pokestops;
     Marker[] marker = new Marker[65060];
@@ -98,7 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                query = "SELECT * FROM `TABLE 1` WHERE lat >" + mylatlng.latitude + "-0.0045 && lat <" + mylatlng.latitude + "+0.0045 && lng > " + mylatlng.longitude + "-0.0064&&lng<" + mylatlng.longitude + "+0.0064";
+                query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude-20.0) + "-0.0045 && lat <" + (mylatlng.latitude-20.0) + "+0.0045 && lng > " + (mylatlng.longitude-120.0) + "-0.0064&&lng<" + (mylatlng.longitude-120.0) + "+0.0064";
                 Log.i("debug", query);
 
                 mMap.clear();
@@ -333,8 +333,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     StringBuilder sb = new StringBuilder();
 
                     for (PokeStop pokestop : pokestops) {
+                        LatLng t1 = new LatLng(pokestop.getLat()+20.0 , pokestop.getLng() + 120.0);
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
+                    }
+                }
+            }
+        };
+
+        @Override
+        public void run() {
+            try {
+                //1.抓資料
+                result_json = run(path_json);
+                //2.改變畫面內容只能用主執行緒(Android機制)
+                runOnUiThread(task);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
+    class findshort extends Thread {
+        String path_json = "http://nyapass.gear.host/";
+        String result_json = null;
+
+        /* This program downloads a URL and print its contents as a string.*/
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = new FormBody.Builder()
+                .add("query_string", query)
+                .build();
+
+        String run(String url) throws IOException {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                //使用 gson 解析 json 資料
+                Log.d("result", result_json);
+                if (result_json != null) {
+                    Gson gson = new Gson();
+                    pokestops = gson.fromJson(result_json, PokeStop[].class);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
-                        marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
 
                     }
                 }
@@ -353,6 +404,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
 
 }
