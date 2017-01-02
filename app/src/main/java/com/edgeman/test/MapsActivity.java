@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +49,7 @@ import okhttp3.Response;
 import static android.R.id.input;
 import static android.graphics.Color.GRAY;
 import static android.graphics.Color.LTGRAY;
+import static com.edgeman.test.R.layout.stopinfo;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private final static String TAG = "MapsActivity";
@@ -149,7 +152,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 this.mMap.addMarker(mko)
         );
     }
-
+/*
     public void drawline(){
         //畫線
         LatLng fju= new LatLng(25.035494,  121.431000);
@@ -162,8 +165,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 color(GRAY).
                 geodesic(true)
         );
-
     }
+*/
 
     public LatLng getLastKnownLocation() {
         LocationManager mLocationManager;
@@ -294,7 +297,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public View getInfoContents(Marker marker) {
-            View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
+            View infoWindow = getLayoutInflater().inflate(stopinfo, null);
+
+            //RelativeLayout imageview2 = imageview2.findViewById();
             Log.i("test","testtttttttt");
             //TextView info1 = infoWindow.findViewById(R.id.);
             return infoWindow;
