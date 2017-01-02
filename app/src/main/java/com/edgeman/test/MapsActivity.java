@@ -114,13 +114,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         getResources().getIdentifier("pokestop", "drawable", getPackageName())
                 )
         );
+        MarkerOptions mko = new MarkerOptions()
+                .position(latLng)
+                .title(title)
+                .icon(descriptor);
+        infoAdapter adapter111 = new infoAdapter();
+        mMap.setInfoWindowAdapter(adapter111);
+        mMap.addMarker(mko).showInfoWindow();
         return (
-                this.mMap.addMarker(
-                        new MarkerOptions()
-                                .position(latLng)
-                                .title(title)
-                                .icon(descriptor)
-                )
+                this.mMap.addMarker(mko)
         );
     }
 
@@ -204,6 +206,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
                 */
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mylatlng, 16));
+        infoAdapter adapter = new infoAdapter();
+        mMap.setInfoWindowAdapter(adapter);
+
     }
 
 
@@ -242,14 +247,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
-    mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
-
-        @Override
-        public void onInfoWindowClick(Marker marker) {
-
-            Log.d("", marker.getTitle());
-        }
-    });
     class infoAdapter implements GoogleMap.InfoWindowAdapter {
         @Override
         public View getInfoWindow(Marker marker) {
@@ -259,8 +256,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public View getInfoContents(Marker marker) {
             View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
+            Log.i("test","testtttttttt");
             //TextView info1 = infoWindow.findViewById(R.id.);
-            return null;
+            return infoWindow;
         }
     }
 
