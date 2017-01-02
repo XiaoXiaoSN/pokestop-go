@@ -23,7 +23,7 @@ public class PokeStop {
     }
 
     public void setLat(double lat) {
-        this.lat = lat;
+        this.lat = lat+20.0;
     }
 
     public double getLng() {
@@ -31,7 +31,7 @@ public class PokeStop {
     }
 
     public void setLng(double lng) {
-        this.lng = lng;
+        this.lng = lng+120.0;
     }
 
 
