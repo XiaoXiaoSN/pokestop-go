@@ -6,14 +6,20 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.appindexing.Action;
+import com.google.android.gms.appindexing.AppIndex;
+import com.google.android.gms.appindexing.Thing;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,34 +46,43 @@ import static android.R.id.input;
 import static android.graphics.Color.GRAY;
 import static android.graphics.Color.LTGRAY;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
-{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
-    String query="SELECT * FROM `TABLE 1` LIMIT 20";
-    LatLng mylatlng ;
+    String query = "SELECT * FROM `TABLE 1` LIMIT 20";
+    LatLng mylatlng;
     PokeStop[] pokestops;
     Marker[] marker = new Marker[65060];
 
     LocationManager lm;
     LocationListener locationListener = new LocationListener() {
         public void onLocationChanged(Location location) {
-            mylatlng = new LatLng( location.getLatitude(), location.getLongitude());
+            mylatlng = new LatLng(location.getLatitude(), location.getLongitude());
             Toast.makeText(MapsActivity.this,
-                    Double.toString(mylatlng.latitude )+" , "+Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                    Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
         }
-        public void onProviderDisabled(String provider) {}
-        public void onProviderEnabled(String provider) {}
-        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        public void onProviderDisabled(String provider) {
+        }
+
+        public void onProviderEnabled(String provider) {
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+        }
     };
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    private GoogleApiClient client;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        final Button restart ;
-        restart= (Button)findViewById(R.id.button_restart);
+        final Button restart;
+        restart = (Button) findViewById(R.id.button_restart);
 
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         checkPermission();
@@ -81,16 +96,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                query = "SELECT * FROM `TABLE 1` WHERE lat >"+ mylatlng.latitude+"-0.0045 && lat <"+mylatlng.latitude+"+0.0045 && lng > "+mylatlng.longitude+"-0.0064&&lng<"+mylatlng.longitude+"+0.0064";
-                Log.i("debug",query);
+                query = "SELECT * FROM `TABLE 1` WHERE lat >" + mylatlng.latitude + "-0.0045 && lat <" + mylatlng.latitude + "+0.0045 && lng > " + mylatlng.longitude + "-0.0064&&lng<" + mylatlng.longitude + "+0.0064";
+                Log.i("debug", query);
 
                 mMap.clear();
                 new RunWork().start();
             }
         });
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public Marker addPokeMarker(LatLng latLng, String title, String stopid){
+    public Marker addPokeMarker(LatLng latLng, String title, String stopid) {
         BitmapDescriptor descriptor = (
                 BitmapDescriptorFactory.fromResource(
                         getResources().getIdentifier("pokestop", "drawable", getPackageName())
@@ -99,9 +117,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (
                 this.mMap.addMarker(
                         new MarkerOptions()
-                                .position( latLng )
-                                .title( title )
-                                .icon( descriptor )
+                                .position(latLng)
+                                .title(title)
+                                .icon(descriptor)
                 )
         );
     }
@@ -111,7 +129,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
-        if( !checkPermission() ) return null;
+        if (!checkPermission()) return null;
         for (String provider : providers) {
             Location l = mLocationManager.getLastKnownLocation(provider);
             if (l == null) {
@@ -136,21 +154,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.e("ERR", "No Permission");
             ActivityCompat.requestPermissions(
                     this,
-                    new String[] {
+                    new String[]{
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.ACCESS_COARSE_LOCATION
                     },
                     10
             );
             return false;
-        }
-        else
+        } else
             return true;
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
@@ -172,9 +188,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mylatlng = getLastKnownLocation();
         Toast.makeText(MapsActivity.this,
-                Double.toString(mylatlng.latitude)+" , "+Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
 
-        Marker marker = addPokeMarker(mylatlng,"開起來的時候","100");
+        Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100");
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
@@ -187,21 +203,78 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /*mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(16));     // 放大地圖到 16 倍大
                 */
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mylatlng,16));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mylatlng, 16));
     }
 
 
+    /**
+     * ATTENTION: This was auto-generated to implement the App Indexing API.
+     * See https://g.co/AppIndexing/AndroidStudio for more information.
+     */
+    public Action getIndexApiAction() {
+        Thing object = new Thing.Builder()
+                .setName("Maps Page") // TODO: Define a title for the content shown.
+                // TODO: Make sure this auto-generated URL is correct.
+                .setUrl(Uri.parse("http://[ENTER-YOUR-URL-HERE]"))
+                .build();
+        return new Action.Builder(Action.TYPE_VIEW)
+                .setObject(object)
+                .setActionStatus(Action.STATUS_TYPE_COMPLETED)
+                .build();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        client.connect();
+        AppIndex.AppIndexApi.start(client, getIndexApiAction());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
+        AppIndex.AppIndexApi.end(client, getIndexApiAction());
+        client.disconnect();
+    }
+    mMap.setOnInfoWindowClickListener(new OnInfoWindowClickListener() {
+
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+
+            Log.d("", marker.getTitle());
+        }
+    });
+    class infoAdapter implements GoogleMap.InfoWindowAdapter {
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
+            //TextView info1 = infoWindow.findViewById(R.id.);
+            return null;
+        }
+    }
+
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
-    class RunWork extends Thread
-    {
-        String path_json ="http://nyapass.gear.host/";
+    class RunWork extends Thread {
+        String path_json = "http://nyapass.gear.host/";
         String result_json = null;
 
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string",query)
+                .add("query_string", query)
                 .build();
+
         String run(String url) throws IOException {
             Request request = new Request.Builder()
                     .url(url)
@@ -212,12 +285,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return response.body().string();
         }
 
-        Runnable task = new Runnable()
-        {
+        Runnable task = new Runnable() {
             @Override
             public void run() {
                 //使用 gson 解析 json 資料
-                Log.d("result",result_json);
+                Log.d("result", result_json);
                 if (result_json != null) {
                     Gson gson = new Gson();
                     pokestops = gson.fromJson(result_json, PokeStop[].class);
@@ -233,8 +305,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
         @Override
-        public void run()
-        {
+        public void run() {
             try {
                 //1.抓資料
                 result_json = run(path_json);
@@ -245,7 +316,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
 
 
 }
