@@ -3,6 +3,7 @@ package com.edgeman.test;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,6 +35,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.FormBody;
@@ -114,6 +116,28 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         getResources().getIdentifier("pokestop", "drawable", getPackageName())
                 )
         );
+
+        ArrayList<LatLng> latLngs = new ArrayList<>();
+
+        latLngs.add(new LatLng(25.035877438787313,121.43135905265808));
+        latLngs.add(new LatLng(25.035896880358834,121.43243193626404));
+        latLngs.add(new LatLng(25.03476926411677,121.43314003944397));
+        latLngs.add(new LatLng(25.03445819574321,121.43213152885437));
+        latLngs.add(new LatLng(25.035196981842528,121.4309298992157));
+
+        for( int i = 1; i < latLngs.size(); i++ ){
+            this.mMap.addPolyline(
+                    new PolylineOptions()
+                            .add(latLngs.get(i-1),latLngs.get(i))
+                            .width(20)
+                            .color(Color.rgb(204, 0, 204))
+                            .geodesic(true)
+
+            );
+        }
+
+
+
         MarkerOptions mko = new MarkerOptions()
                 .position(latLng)
                 .title(title)
@@ -124,6 +148,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return (
                 this.mMap.addMarker(mko)
         );
+    }
+
+    public void drawline(){
+        //畫線
+        LatLng fju= new LatLng(25.035494,  121.431000);
+        LatLng fju1 = new LatLng(23.202,  119.435);
+        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
+        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
+        mMap.addPolyline(new PolylineOptions().
+                add(fju,fju1).
+                width(5).
+                color(GRAY).
+                geodesic(true)
+        );
+
     }
 
     public LatLng getLastKnownLocation() {
@@ -177,7 +216,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         /*
         //畫線
         LatLng fju= new LatLng(25.035494,  121.431000);
-        LatLng fju1 = new LatLng(25.035494,  121.431618);
+       LatLng fju1 = new LatLng(23.202,  119.435);
         mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
         mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
         mMap.addPolyline(new PolylineOptions().
