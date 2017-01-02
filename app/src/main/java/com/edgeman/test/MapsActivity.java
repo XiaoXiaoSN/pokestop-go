@@ -10,6 +10,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -28,6 +29,7 @@ import okhttp3.Response;
 import static android.R.id.input;
 import static android.graphics.Color.GRAY;
 import static android.graphics.Color.LTGRAY;
+import static android.graphics.Color.RED;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 {
@@ -62,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
     }
-    
+
 
     /**
      * Manipulates the map once available.
@@ -102,14 +104,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
         // 替換上輔大的座標25.035494, 121.431618
 
+        MarkerOptions stop= new MarkerOptions();
+        stop.title("PokeStop");
+        stop.icon(BitmapDescriptorFactory.fromAsset("poke.png"));
+        stop.anchor(0.5f, 0.5f);//設為圖片中心
+
         LatLng fju= new LatLng(25.035494,  121.431000);
         LatLng fju1 = new LatLng(25.035494,  121.431618);
-        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
-        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
+
+        //mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學").icon(BitmapDescriptorFactory.fromAsset("poke.png")));
+        mMap.addMarker(stop.position(fju1));
+        mMap.addMarker(stop.position(fju));
         mMap.addPolyline(new PolylineOptions().
                 add(fju,fju1).
-                width(5).
-                color(GRAY).
+                width(10).
+                color(RED).
                 geodesic(true)
         );
 
@@ -163,7 +172,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     LatLng t1 = new LatLng(pokestop.getLat(),  pokestop.getLng());
                     //25.031756, 121.426571             25.040756, 121.439397    && t1.longitude>121.426571 &&t1.longitude<121.439397
                     //if(t1.latitude > 25.035494 && t1.latitude <25.040756 && t1.longitude>121.426571 &&t1.longitude<121.439397) {
-                        m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions().position(t1).title(pokestop.getStopID()).visible(true));
+                        m[Integer.parseInt(pokestop.getStopID())] = mMap.addMarker(new MarkerOptions()
+                                    .position(t1)
+                                    .title(pokestop.getStopID())
+                                    .visible(true)
+                                    .icon(BitmapDescriptorFactory.fromAsset("poke.png")));
                     //}
                 }
 
