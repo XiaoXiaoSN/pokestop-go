@@ -3,11 +3,15 @@ package com.edgeman.test;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -36,6 +40,10 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -110,7 +118,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-
     public Marker addPokeMarker(LatLng latLng, String title, String stopid, String pic) {
         BitmapDescriptor descriptor = (
                 BitmapDescriptorFactory.fromResource(
@@ -244,14 +251,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public View getInfoContents(Marker marker) {
-            View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
+            final View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
             Log.i("test","testtttttttttt");
-            ImageView iv =  (ImageView)findViewById(R.id.imageView1);
-            TextView tv1 = (TextView) findViewById(R.id.text1);
-            TextView tv2 = (TextView) findViewById(R.id.text2);
+            PokeStop temp = findpokestop(marker.getTitle());
+            final ImageView iv =  (ImageView)infoWindow.findViewById(R.id.imageView1);
+            TextView tv1 = (TextView) infoWindow.findViewById(R.id.text1);
+            TextView tv2 = (TextView) infoWindow.findViewById(R.id.text2);
+            if(temp!=null){
+                tv1.setText("補給站"+temp.getStopID());
+                tv2.setText(temp.getName());
+            }
 
             return infoWindow;
         }
+    }
+    public static Bitmap getBitmapFromURL(String src){
+        try {
+            URL url = new URL(src);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.connect();
+
+            InputStream input = conn.getInputStream();
+            Bitmap mBitmap = BitmapFactory.decodeStream(input);
+            return  mBitmap;
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        }
+        return null;
+    }
+
+    public PokeStop findpokestop(String input){
+        if(pokestops!=null) {
+            for (PokeStop pokestop : pokestops) {
+                if (input.equals(pokestop.getStopID()+"")){
+                    return pokestop;
+                }
+            }
+        }
+        return null;
     }
 
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
