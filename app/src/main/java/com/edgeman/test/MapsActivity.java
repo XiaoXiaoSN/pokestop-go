@@ -368,6 +368,57 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+    // working on now.
+
+    class getroute extends Thread {
+            String path_json = "https://maps.googleapis.com/maps/api/directions/json?origin=Toronto&destination=Montreal&key=AIzaSyA-ICwrJO2qbAUr5uvRcjuT_X33fl2PNyM";
+        String result_json = null;
+
+        /* This program downloads a URL and print its contents as a string.*/
+
+        OkHttpClient client = new OkHttpClient();
+
+        String run(String url) throws IOException {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                //使用 gson 解析 json 資料
+                Log.d("result", result_json);
+                if (result_json != null) {
+                    Gson gson = new Gson();
+                    pokestops = gson.fromJson(result_json, PokeStop[].class);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (PokeStop pokestop : pokestops) {
+                        LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
+                    }
+                }
+            }
+        };
+        @Override
+        public void run() {
+            try {
+                //1.抓資料
+                result_json = run(path_json);
+                //2.改變畫面內容只能用主執行緒(Android機制)
+                runOnUiThread(task);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
     class findline extends Thread {
         String path_json = "http://nyapass.gear.host/";
