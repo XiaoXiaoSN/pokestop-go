@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,15 +45,15 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static android.R.id.button1;
 import static android.R.id.input;
 import static android.graphics.Color.GRAY;
 import static android.graphics.Color.LTGRAY;
-import static com.edgeman.test.R.layout.stopinfo;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private final static String TAG = "MapsActivity";
     private GoogleMap mMap;
-    String query = "SELECT * FROM `TABLE 1` LIMIT 20";
+    String query = "";
     LatLng mylatlng;
     PokeStop[] pokestops;
     Marker[] marker = new Marker[65060];
@@ -64,7 +63,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void onLocationChanged(Location location) {
             mylatlng = new LatLng(location.getLatitude(), location.getLongitude());
             Toast.makeText(MapsActivity.this,
-                    Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                    Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
         }
 
         public void onProviderDisabled(String provider) {
@@ -87,8 +86,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         final Button restart;
+        Button redrawline;
         restart = (Button) findViewById(R.id.button_restart);
-
+        redrawline = (Button) findViewById(R.id.button_drawline);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         checkPermission();
         lm.requestLocationUpdates(lm.GPS_PROVIDER, 200, 5, locationListener);
@@ -101,11 +101,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                query = "SELECT * FROM `TABLE 1` WHERE lat >" + mylatlng.latitude + "-0.0045 && lat <" + mylatlng.latitude + "+0.0045 && lng > " + mylatlng.longitude + "-0.0064&&lng<" + mylatlng.longitude + "+0.0064";
-                Log.i("debug", query);
+                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
+                //Log.i("debug", query);
 
                 mMap.clear();
                 new RunWork().start();
+            }
+        });
+        redrawline.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
+                Log.i("debug", "newbutton");
+
+                mMap.clear();
+                new findline().start();
             }
         });
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -152,7 +161,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 this.mMap.addMarker(mko)
         );
     }
-/*
+    /*
     public void drawline(){
         //畫線
         LatLng fju= new LatLng(25.035494,  121.431000);
@@ -165,9 +174,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 color(GRAY).
                 geodesic(true)
         );
+
     }
 */
-
     public LatLng getLastKnownLocation() {
         LocationManager mLocationManager;
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -232,7 +241,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mylatlng = getLastKnownLocation();
         Toast.makeText(MapsActivity.this,
-                Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_LONG).show();
+                Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
 
         Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100");
 
@@ -297,17 +306,70 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         @Override
         public View getInfoContents(Marker marker) {
-            View infoWindow = getLayoutInflater().inflate(stopinfo, null);
+            View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
+            Log.i("test","testtttttttttt");
+            ImageView iv =  (ImageView)findViewById(R.id.imageView1);
+            TextView tv1 = (TextView) findViewById(R.id.text1);
+            TextView tv2 = (TextView) findViewById(R.id.text2);
 
-            //RelativeLayout imageview2 = imageview2.findViewById();
-            Log.i("test","testtttttttt");
-            //TextView info1 = infoWindow.findViewById(R.id.);
             return infoWindow;
         }
     }
 
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
     class RunWork extends Thread {
+        String path_json = "http://nyapass.gear.host/getStop.php";
+        String result_json = null;
+
+        /* This program downloads a URL and print its contents as a string.*/
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = new FormBody.Builder()
+                .add("lat",Double.toString(mylatlng.latitude))
+                .add("lng",Double.toString(mylatlng.longitude))
+                .build();
+
+        String run(String url) throws IOException {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                //使用 gson 解析 json 資料
+                Log.d("result", result_json);
+                if (result_json != null) {
+                    Gson gson = new Gson();
+                    pokestops = gson.fromJson(result_json, PokeStop[].class);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (PokeStop pokestop : pokestops) {
+                        LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
+                    }
+                }
+            }
+        };
+
+        @Override
+        public void run() {
+            try {
+                //1.抓資料
+                result_json = run(path_json);
+                //2.改變畫面內容只能用主執行緒(Android機制)
+                runOnUiThread(task);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
+    class findline extends Thread {
         String path_json = "http://nyapass.gear.host/";
         String result_json = null;
 
@@ -339,8 +401,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
-                        marker[Integer.parseInt(pokestop.getStopID())] = addPokeMarker(t1, pokestop.getStopID(), pokestop.getStopID());
-
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
                     }
                 }
             }
@@ -358,6 +419,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
-
 
 }
