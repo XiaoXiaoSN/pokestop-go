@@ -65,7 +65,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String query = "";
     LatLng mylatlng;
     PokeStop[] pokestops;
-    PokeGym[] pokegyms;
+    PokeStop[] pokegyms;
     Marker[] marker = new Marker[66094];
     Marker[] Gym_marker = new Marker[9640];
 
@@ -119,7 +119,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
-    public Marker addPokeMarker(LatLng latLng, String title, String stopid, String pic) {
+    public Marker addPokeMarker(LatLng latLng, String title, String stopid, String pic, int type) {
         BitmapDescriptor descriptor = (
                 BitmapDescriptorFactory.fromResource(
                         getResources().getIdentifier(pic, "drawable", getPackageName())
@@ -129,7 +129,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         MarkerOptions mko = new MarkerOptions()
                 .position(latLng)
                 .title(title)
-                .icon(descriptor);
+                .icon(descriptor)
+                .snippet("type:"+type);
         infoAdapter adapter111 = new infoAdapter();
         mMap.setInfoWindowAdapter(adapter111);
         mMap.addMarker(mko).showInfoWindow();
@@ -188,7 +189,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Toast.makeText(MapsActivity.this,
                 Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
 
-        Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100", "eevee64");
+        Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100", "eevee64", 0);
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
@@ -253,13 +254,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public View getInfoContents(Marker marker) {
             final View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
-
-            PokeStop temp = findpokestop(marker.getTitle());
+            Log.i("test","testtttttttttt");
+            PokeStop temp;
+            if ( marker.getSnippet().equals("type:0") ) {
+                temp = findpokestop(marker.getTitle(), 0);
+            }else{
+                temp = findpokestop(marker.getTitle(), 1);
+            }
             final ImageView iv =  (ImageView)infoWindow.findViewById(R.id.imageView1);
             TextView tv1 = (TextView) infoWindow.findViewById(R.id.text1);
             TextView tv2 = (TextView) infoWindow.findViewById(R.id.text2);
             if(temp!=null){
-                tv1.setText("補給站"+temp.getStopID());
+                if ( marker.getSnippet().equals("type:0") ) {
+                    tv1.setText("補給站"+temp.getStopID());
+                }else{
+                    tv1.setText("道館"+temp.getStopID());
+                }
                 tv2.setText(temp.getName());
                 Log.i("test",temp.getPic());
                 Picasso.with(infoWindow.getContext()).load(temp.getPic()).into(iv);
@@ -285,11 +295,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return null;
     }
 
-    public PokeStop findpokestop(String input){
-        if(pokestops!=null) {
-            for (PokeStop pokestop : pokestops) {
-                if (input.equals(pokestop.getStopID()+"")){
-                    return pokestop;
+    public PokeStop findpokestop(String input, int type){
+        if (type == 0){
+            if(pokestops!=null) {
+                for (PokeStop pokestop : pokestops) {
+                    if (input.equals(pokestop.getStopID()+"")){
+                        return pokestop;
+                    }
+                }
+            }
+        }else{
+            if(pokegyms!=null) {
+                for (PokeStop pokegym : pokegyms) {
+                    if (input.equals(pokegym.getStopID()+"")){
+                        return pokegym;
+                    }
                 }
             }
         }
@@ -330,7 +350,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
-                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop");
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop", 0);
                     }
                 }
             }
@@ -378,12 +398,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("result", result_json);
                 if (result_json != null) {
                     Gson gson = new Gson();
-                    pokegyms = gson.fromJson(result_json, PokeGym[].class);
+                    pokegyms = gson.fromJson(result_json, PokeStop[].class);
                     StringBuilder sb = new StringBuilder();
 
-                    for (PokeGym pokegym : pokegyms) {
+                    for (PokeStop pokegym : pokegyms) {
                         LatLng t1 = new LatLng(pokegym.getLat() , pokegym.getLng());
-                        Gym_marker[pokegym.getStopID()] = addPokeMarker(t1, pokegym.getStopID()+"", pokegym.getStopID()+"", "valor");
+                        Gym_marker[pokegym.getStopID()] = addPokeMarker(t1, pokegym.getStopID()+"", pokegym.getStopID()+"", "valor", 1);
                     }
                 }
             }
@@ -436,7 +456,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ArrayList<LatLng> line_link = new ArrayList<>();
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
-                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop2");
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop2", 0);
                         line_link.add(t1);
                     }
                     drawLine(line_link);
