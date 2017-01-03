@@ -248,12 +248,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public View getInfoContents(Marker marker) {
             View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
             Log.i("test","testtttttttttt");
-            ImageView iv =  (ImageView)findViewById(R.id.imageView1);
-            TextView tv1 = (TextView) findViewById(R.id.text1);
-            TextView tv2 = (TextView) findViewById(R.id.text2);
-
+            PokeStop temp = findpokestop(marker.getTitle());
+            ImageView iv =  (ImageView)infoWindow.findViewById(R.id.imageView1);
+            TextView tv1 = (TextView) infoWindow.findViewById(R.id.text1);
+            TextView tv2 = (TextView) infoWindow.findViewById(R.id.text2);
+            if(temp!=null){
+                tv1.setText("補給站"+temp.getStopID());
+                tv2.setText(temp.getName());
+            }
             return infoWindow;
         }
+    }
+    public PokeStop findpokestop(String input){
+        if(pokestops!=null) {
+            for (PokeStop pokestop : pokestops) {
+                if (input.equals(pokestop.getStopID()+"")){
+                    return pokestop;
+                }
+            }
+        }
+        return null;
     }
 
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
