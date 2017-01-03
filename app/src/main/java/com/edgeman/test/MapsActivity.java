@@ -45,6 +45,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import static android.R.id.button1;
 import static android.R.id.input;
 import static android.graphics.Color.GRAY;
 import static android.graphics.Color.LTGRAY;
@@ -401,7 +402,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
                         marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
-
                     }
                 }
             }
