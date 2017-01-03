@@ -5,17 +5,16 @@ package com.edgeman.test;
  */
 
 public class PokeStop {
-    private String stopid;
+    private int ID;
     private double lat;
     private double lng;
-    private int file;
-
-    public String getStopID() {
-        return stopid;
+    //private int file;
+    public int getStopID() {
+        return ID;
     }
 
-    public void setStopID(String stopid) {
-        this.stopid = stopid;
+    public void setStopID(int stopid) {
+        this.ID = stopid;
     }
 
     public double getLat() {
@@ -34,12 +33,8 @@ public class PokeStop {
         this.lng = lng;
     }
 
-    public int getFile() {
-        return file;
-    }
 
-    public void setFile(int file) {
-        this.file = file;
-    }
+
+
 
 }
