@@ -65,15 +65,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Toast.makeText(MapsActivity.this,
                     Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
         }
-
-        public void onProviderDisabled(String provider) {
-        }
-
-        public void onProviderEnabled(String provider) {
-        }
-
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-        }
+        public void onProviderDisabled(String provider) {}
+        public void onProviderEnabled(String provider) {}
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
     };
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -93,7 +87,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         checkPermission();
         lm.requestLocationUpdates(lm.GPS_PROVIDER, 200, 5, locationListener);
 
-
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -111,8 +104,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         redrawline.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
-                Log.i("debug", "newbutton");
-
                 mMap.clear();
                 new findline().start();
             }
@@ -122,33 +113,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
-    public Marker addPokeMarker(LatLng latLng, String title, String stopid) {
+    public Marker addPokeMarker(LatLng latLng, String title, String stopid, String pic) {
         BitmapDescriptor descriptor = (
                 BitmapDescriptorFactory.fromResource(
-                        getResources().getIdentifier("pokestop", "drawable", getPackageName())
+                        getResources().getIdentifier(pic, "drawable", getPackageName())
                 )
         );
-
-        ArrayList<LatLng> latLngs = new ArrayList<>();
-
-        latLngs.add(new LatLng(25.035877438787313,121.43135905265808));
-        latLngs.add(new LatLng(25.035896880358834,121.43243193626404));
-        latLngs.add(new LatLng(25.03476926411677,121.43314003944397));
-        latLngs.add(new LatLng(25.03445819574321,121.43213152885437));
-        latLngs.add(new LatLng(25.035196981842528,121.4309298992157));
-
-        for( int i = 1; i < latLngs.size(); i++ ){
-            this.mMap.addPolyline(
-                    new PolylineOptions()
-                            .add(latLngs.get(i-1),latLngs.get(i))
-                            .width(20)
-                            .color(Color.rgb(204, 0, 204))
-                            .geodesic(true)
-
-            );
-        }
-
-
 
         MarkerOptions mko = new MarkerOptions()
                 .position(latLng)
@@ -161,22 +131,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 this.mMap.addMarker(mko)
         );
     }
-    /*
-    public void drawline(){
-        //畫線
-        LatLng fju= new LatLng(25.035494,  121.431000);
-        LatLng fju1 = new LatLng(23.202,  119.435);
-        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
-        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
-        mMap.addPolyline(new PolylineOptions().
-                add(fju,fju1).
-                width(5).
-                color(GRAY).
-                geodesic(true)
-        );
 
-    }
-*/
+
     public LatLng getLastKnownLocation() {
         LocationManager mLocationManager;
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -221,29 +177,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        // Add a marker in Sydney and move the camera
-        // LatLng sydney = new LatLng(-34, 151);  原本的座標值是雪梨某處
-        // 替換上輔大的座標25.035494, 121.431618
-
-        /*
-        //畫線
-        LatLng fju= new LatLng(25.035494,  121.431000);
-       LatLng fju1 = new LatLng(23.202,  119.435);
-        mMap.addMarker(new MarkerOptions().position(fju1).title("輔仁大學"));
-        mMap.addMarker(new MarkerOptions().position(fju).title("誰知道"));
-        mMap.addPolyline(new PolylineOptions().
-                add(fju,fju1).
-                width(5).
-                color(GRAY).
-                geodesic(true)
-        );
-        */
 
         mylatlng = getLastKnownLocation();
         Toast.makeText(MapsActivity.this,
                 Double.toString(mylatlng.latitude) + " , " + Double.toString(mylatlng.longitude), Toast.LENGTH_SHORT).show();
 
-        Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100");
+        Marker marker = addPokeMarker(mylatlng, "開起來的時候", "100", "eevee64");
 
         mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map)).getMap();
         mMap.setMyLocationEnabled(true); // 右上角的定位功能；這行會出現紅色底線，不過仍可正常編譯執行
@@ -298,6 +237,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         AppIndex.AppIndexApi.end(client, getIndexApiAction());
         client.disconnect();
     }
+
     class infoAdapter implements GoogleMap.InfoWindowAdapter {
         @Override
         public View getInfoWindow(Marker marker) {
@@ -350,7 +290,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
-                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop");
                     }
                 }
             }
@@ -370,13 +310,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
     class findline extends Thread {
-        String path_json = "http://nyapass.gear.host/";
+        String path_json = "http://nyapass.gear.host/find_shortest.php";
         String result_json = null;
 
         /* This program downloads a URL and print its contents as a string.*/
         OkHttpClient client = new OkHttpClient();
         RequestBody body = new FormBody.Builder()
-                .add("query_string", query)
+                .add("lat",Double.toString(mylatlng.latitude))
+                .add("lng",Double.toString(mylatlng.longitude))
                 .build();
 
         String run(String url) throws IOException {
@@ -399,11 +340,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     pokestops = gson.fromJson(result_json, PokeStop[].class);
                     StringBuilder sb = new StringBuilder();
 
+                    ArrayList<LatLng> line_link = new ArrayList<>();
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat(), pokestop.getLng());
-                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"");
+                        marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop2");
+                        line_link.add(t1);
+                    }
+                    drawLine(line_link);
+                }
+            }
+            public void drawLine(ArrayList<LatLng> line_link){
+                // 畫線囉，線的點在findline順便存起來了喔
+                for(int i=0; i<line_link.size(); i++){
+                    if (i == 0){
+                        mMap.addPolyline(
+                                new PolylineOptions()
+                                        .add(mylatlng, line_link.get(i))
+                                        .width(10)
+                                        .color(Color.rgb(204, 0, 204))
+                                        .geodesic(true)
+                        );
+                    }else {
+                        mMap.addPolyline(
+                                new PolylineOptions()
+                                        .add(line_link.get(i-1),line_link.get(i))
+                                        .width(10)
+                                        .color(Color.rgb(204, 0, 204))
+                                        .geodesic(true)
+                        );
                     }
                 }
+                //連起來囉
             }
         };
 
