@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -252,7 +253,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public View getInfoContents(Marker marker) {
             final View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
-            Log.i("test","testtttttttttt");
+
             PokeStop temp = findpokestop(marker.getTitle());
             final ImageView iv =  (ImageView)infoWindow.findViewById(R.id.imageView1);
             TextView tv1 = (TextView) infoWindow.findViewById(R.id.text1);
@@ -260,11 +261,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if(temp!=null){
                 tv1.setText("補給站"+temp.getStopID());
                 tv2.setText(temp.getName());
+                Log.i("test",temp.getPic());
+                Picasso.with(infoWindow.getContext()).load(temp.getPic()).into(iv);
             }
 
             return infoWindow;
         }
     }
+
     public static Bitmap getBitmapFromURL(String src){
         try {
             URL url = new URL(src);
