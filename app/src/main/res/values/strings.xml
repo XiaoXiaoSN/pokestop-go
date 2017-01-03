@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">test</string>
-    <string name="title_activity_maps">Map101</string>
+    <string name="app_name">PokeStopGo</string>
+    <string name="title_activity_maps">PokeStopGo</string>
 </resources>
