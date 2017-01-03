@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -112,7 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.i("debug", "newbutton");
 
                 mMap.clear();
-                new RunWork().start();
+                new findline().start();
             }
         });
         // ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -159,7 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 this.mMap.addMarker(mko)
         );
     }
-
+    /*
     public void drawline(){
         //畫線
         LatLng fju= new LatLng(25.035494,  121.431000);
@@ -174,7 +175,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         );
 
     }
-
+*/
     public LatLng getLastKnownLocation() {
         LocationManager mLocationManager;
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -306,7 +307,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public View getInfoContents(Marker marker) {
             View infoWindow = getLayoutInflater().inflate(R.layout.stopinfo, null);
             Log.i("test","testtttttttttt");
-            //TextView info1 = infoWindow.findViewById(R.id.);
+            ImageView iv =  (ImageView)findViewById(R.id.imageView1);
+            TextView tv1 = (TextView) findViewById(R.id.text1);
+            TextView tv2 = (TextView) findViewById(R.id.text2);
+
             return infoWindow;
         }
     }
@@ -364,7 +368,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
-    class drawline extends Thread {
+    class findline extends Thread {
         String path_json = "http://nyapass.gear.host/";
         String result_json = null;
 
