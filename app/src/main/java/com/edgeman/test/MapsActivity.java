@@ -84,8 +84,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         final Button restart;
+        Button redrawline;
         restart = (Button) findViewById(R.id.button_restart);
-
+        redrawline = (Button) findViewById(R.id.button_drawline);
         lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         checkPermission();
         lm.requestLocationUpdates(lm.GPS_PROVIDER, 200, 5, locationListener);
@@ -100,6 +101,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
                 //Log.i("debug", query);
+
+                mMap.clear();
+                new RunWork().start();
+            }
+        });
+        redrawline.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
+                Log.i("debug", "newbutton");
 
                 mMap.clear();
                 new RunWork().start();
@@ -354,7 +364,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
-    class findshort extends Thread {
+    class drawline extends Thread {
         String path_json = "http://nyapass.gear.host/";
         String result_json = null;
 
