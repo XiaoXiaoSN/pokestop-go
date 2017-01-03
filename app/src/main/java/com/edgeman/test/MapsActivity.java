@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -270,11 +271,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     tv1.setText("道館"+temp.getStopID());
                 }
                 tv2.setText(temp.getName());
+                Log.i("test",temp.getPic());
+                Picasso.with(infoWindow.getContext()).load(temp.getPic()).into(iv);
             }
 
             return infoWindow;
         }
     }
+
     public static Bitmap getBitmapFromURL(String src){
         try {
             URL url = new URL(src);
