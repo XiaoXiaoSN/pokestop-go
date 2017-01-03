@@ -64,7 +64,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     String query = "";
     LatLng mylatlng;
     PokeStop[] pokestops;
-    Marker[] marker = new Marker[65060];
+    PokeGym[] pokegyms;
+    Marker[] marker = new Marker[66094];
+    Marker[] Gym_marker = new Marker[9640];
 
     LocationManager lm;
     LocationListener locationListener = new LocationListener() {
@@ -99,19 +101,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        //new RunWork().start();
         restart.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
-                //Log.i("debug", query);
-
                 mMap.clear();
-                new RunWork().start();
+                new GetStops().start();
+                new GetGyms().start();
             }
         });
         redrawline.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //query = "SELECT * FROM `stop` WHERE lat >" + (mylatlng.latitude) + "-0.0045 && lat <" + (mylatlng.latitude) + "+0.0045 && lng > " + (mylatlng.longitude) + "-0.0064&&lng<" + (mylatlng.longitude) + "+0.0064";
                 mMap.clear();
                 new findline().start();
             }
@@ -295,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
-    class RunWork extends Thread {
+    class GetStops extends Thread {
         String path_json = "http://nyapass.gear.host/getStop.php";
         String result_json = null;
 
@@ -329,6 +327,59 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     for (PokeStop pokestop : pokestops) {
                         LatLng t1 = new LatLng(pokestop.getLat() , pokestop.getLng());
                         marker[pokestop.getStopID()] = addPokeMarker(t1, pokestop.getStopID()+"", pokestop.getStopID()+"", "pokestop");
+                    }
+                }
+            }
+        };
+
+        @Override
+        public void run() {
+            try {
+                //1.抓資料
+                result_json = run(path_json);
+                //2.改變畫面內容只能用主執行緒(Android機制)
+                runOnUiThread(task);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    /*上網抓資料，需要另外開執行緒做處理(Android機制)*/
+    class GetGyms extends Thread {
+
+        String path_json = "http://nyapass.gear.host/getGym.php";
+        String result_json = null;
+
+        /* This program downloads a URL and print its contents as a string.*/
+        OkHttpClient client = new OkHttpClient();
+        RequestBody body = new FormBody.Builder()
+                .add("lat",Double.toString(mylatlng.latitude))
+                .add("lng",Double.toString(mylatlng.longitude))
+                .build();
+
+        String run(String url) throws IOException {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(body)
+                    .build();
+
+            Response response = client.newCall(request).execute();
+            return response.body().string();
+        }
+
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                //使用 gson 解析 json 資料
+                Log.d("result", result_json);
+                if (result_json != null) {
+                    Gson gson = new Gson();
+                    pokegyms = gson.fromJson(result_json, PokeGym[].class);
+                    StringBuilder sb = new StringBuilder();
+
+                    for (PokeGym pokegym : pokegyms) {
+                        LatLng t1 = new LatLng(pokegym.getLat() , pokegym.getLng());
+                        Gym_marker[pokegym.getStopID()] = addPokeMarker(t1, pokegym.getStopID()+"", pokegym.getStopID()+"", "valor");
                     }
                 }
             }

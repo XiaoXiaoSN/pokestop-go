@@ -2,11 +2,11 @@ package com.edgeman.test;
 
 import android.support.annotation.VisibleForTesting;
 
-/**
- * Created by webberwu on 2016/10/23.
+/*
+ * Created by xiao on 2017/01/04.
  */
 
-public class PokeStop {
+public class PokeGym {
     private int ID;
     private double lat;
     private double lng;
@@ -14,9 +14,7 @@ public class PokeStop {
     private String pic;
 
     //private int file;
-    public int getStopID() {
-        return ID;
-    }
+    public int getStopID() { return ID; }
     public void setStopID(int stopid) {
         this.ID = stopid;
     }
@@ -30,7 +28,6 @@ public class PokeStop {
     public void setLng(double lng) {
         this.lng = lng;
     }
-
 
     public String getName() { return name;}
     public void setName(String name) {
